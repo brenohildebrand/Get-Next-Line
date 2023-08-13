@@ -4,3 +4,14 @@ hello again
 a line
 another line
 yet another line
+
+"editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "scope": "keyword.control.loop",
+                "settings": {
+                    "foreground": "#FF0000"  // Specify the color you want to use
+                }
+            }
+        ]
+    },

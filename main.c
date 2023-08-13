@@ -7,20 +7,23 @@
 int	main(void)
 {
 	int		fd;
+	int		line_number;
 	char	*line;
 
-	fd = open("/nfs/homes/bhildebr/GitHub/Get Next Line/test.txt", O_RDONLY);
+	line_number = 1;
+	fd = open("/mnt/c/users/breno/GitHub/Get-Next-Line/test.txt", O_RDONLY);
 	if (fd == -1)
 	{
-		printf("FD ERROR!");
+		printf("FD ERROR!\n");
 		return (0);
 	}
-	while(1)
+	loop
 	{
 		line = get_next_line(fd);
 		if (line == NULL)
 			break ;
-		printf("L: %s", line);
+		printf("%2i: %s", line_number++, line);
 	}
+	printf("\n");
 	return (0);
 }
