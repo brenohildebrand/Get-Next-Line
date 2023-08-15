@@ -6,7 +6,7 @@
 /*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 15:34:48 by bhildebr          #+#    #+#             */
-/*   Updated: 2023/08/13 14:15:11 by bhildebr         ###   ########.fr       */
+/*   Updated: 2023/08/15 17:35:16 by bhildebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,8 @@
 
 # include <stdlib.h>
 
-# define loop while(1)
-
 char	*get_next_line(int fd);
-void	*ft_realloc(void *ptr, size_t size);
+char	*read_line(int fd);
+void	free_line(char *line);
 
 #endif

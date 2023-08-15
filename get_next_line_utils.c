@@ -6,33 +6,90 @@
 /*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 15:38:57 by bhildebr          #+#    #+#             */
-/*   Updated: 2023/08/13 14:00:06 by bhildebr         ###   ########.fr       */
+/*   Updated: 2023/08/15 19:08:19 by bhildebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
 
-void	*ft_memcpy(void *dest, const void *src, size_t n)
+static void	handle_read_on_error(char **line, int *should_return)
 {
-	size_t	i;
-	
-	i = 0;
-	while (i < n)
-	{
-		((unsigned char *)dest)[i] = ((unsigned char *)src)[i];
-		i++;
-	}
-	return (dest);
+	free(*line);
+	*line = NULL;
+	*should_return = 1;
 }
 
-void	*ft_realloc(void *ptr, size_t size)
+static void	handle_read_on_end(char **line, int *i, int *should_return)
 {
-	void	*new_ptr;
+	if (*i == 0)
+	{
+		free(*line);
+		*line = NULL;
+	}
+	else
+	{
+		(*line)[*i] = 0;
+	}
+	*should_return = 1;
+}
 
-	new_ptr = malloc(size);
-	if (new_ptr == 0)
-		return (0);
-	ft_memcpy(new_ptr, ptr, sizeof(ptr));
-	free(ptr);
-	return (new_ptr);
+static void	handle_read_on_success(char **line, int *i, int *should_return)
+{
+	int		j;
+	char	*new_line;
+
+	if ((*line)[*i] == '\n')
+		*should_return = 1;
+	else
+	{
+		new_line = malloc((*i + 2) * sizeof(char));
+		if (new_line == NULL)
+		{
+			free(*line);
+			*should_return = 1;
+			return ;
+		}
+		j = 0;
+		while (j < (*i + 1))
+		{
+			new_line[j] = (*line)[j];
+			j++;
+		}
+		free(*line);
+		*line = new_line;
+	}
+	(*i)++;
+}
+
+/**
+ * Read file descriptor till a newline character.
+ * 
+ * @param fd File descriptor
+ * @return A pointer to the allocated line.
+*/
+char	*read_line(int fd)
+{
+	char	*line;
+	int		err;
+	int		i;
+	int		should_return;
+
+	line = malloc(1 * sizeof(char));
+	if (line == NULL)
+		return (NULL);
+	i = 0;
+	should_return = 0;
+	while (should_return == 0)
+	{
+		err = read(fd, &line[i], 1);
+		if (err == -1)
+			handle_read_on_error(&line, &should_return);
+		else if (err == 0)
+			handle_read_on_end(&line, &i, &should_return);
+		else if (err > 0)
+			handle_read_on_success(&line, &i, &should_return);
+	}
+	return (line);
 }
