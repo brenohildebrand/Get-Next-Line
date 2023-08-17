@@ -6,7 +6,7 @@
 /*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 15:38:57 by bhildebr          #+#    #+#             */
-/*   Updated: 2023/08/15 19:08:19 by bhildebr         ###   ########.fr       */
+/*   Updated: 2023/08/15 19:45:36 by bhildebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,14 +76,14 @@ char	*read_line(int fd)
 	int		i;
 	int		should_return;
 
-	line = malloc(1 * sizeof(char));
+	line = malloc(BUFFER_SIZE);
 	if (line == NULL)
 		return (NULL);
 	i = 0;
 	should_return = 0;
 	while (should_return == 0)
 	{
-		err = read(fd, &line[i], 1);
+		err = read(fd, &line[i], BUFFER_SIZE);
 		if (err == -1)
 			handle_read_on_error(&line, &should_return);
 		else if (err == 0)

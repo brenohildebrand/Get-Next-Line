@@ -1,6 +1,2 @@
 okay
-hello
-hello again
-a line
-another line
-yet another line
+
