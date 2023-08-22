@@ -10,111 +10,130 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#ifndef BUFFER_SIZE
+# define BUFFER_SIZE 42
+#endif
 
 #include <stdio.h>
 
-typedef struct s_buffer {
-	void	*ptr;
-	size_t	size;
+typedef struct	s_buffer {
+	char			content[BUFFER_SIZE];
+	unsigned int	size;
 }	t_buffer;
 
-void	ft_memcpy(void *dest, void *src, size_t n)
-{
-	size_t	index;
-
-	index = 0;
-	while (index < n)
-	{
-		((unsigned char *)dest)[index] = ((unsigned char *)src)[index];
-		index++;
-	}
-}
-
-void	ft_realloc(void **ptr, ssize_t n, ssize_t size)
-{
-	void	*new_ptr;
-
-	new_ptr = malloc(size)
-	if(new_ptr == NULL)
-	{
-		free(ptr);
-		return (NULL);
-	}
-	if (ptr)
-		ft_memcpy(new_ptr, ptr, n);
-	free(ptr);
-	ptr = new_ptr;
-}
-
-void	ft_memset(void *ptr, int c, size_t n)
-{
-	int	index;
-
-	index = 0;
-	while (index < n)
-	{
-		((unsigned char *)ptr)[index] = c;
-		index++;
-	}
-}
-
-ssize_t	ft_look_for_newline(void *buffer, ssize_t nread)
-{
-	ssize_t	index;
-
-	index = 0;
-	while (index < nread)
-	{
-		if (buffer[index] == '\n')
-			return (index); 
-		index++;
-	}
-	return (-1);
-}
-
-int	handle_buffer(void **buffer, void **line, ssize_t nread)
-{
-	int	index;
-	int copy_length;
-	int found_newline_at;
-
-	found_newline_at = ft_look_for_newline(buffer, nread);
-	// if found newline then (realloc line) and then (copy from 0 till found_newline_at to line) and (remove from 0 till found_newline_at from buffer) and (return 1 - meaning line is ready)
-	if (found_newline_at == -1)
-	{
-		ft_realloc(line, nread - 1, )
-		ft_memcpy(line, buffer, nread - 1);
-		ft_memset(buffer, 0, nread - 1);
-	}
-	// else then (realloc line) and then (copy from 0 till nread - 1) and (remove from 0 till nread - 1)
-	else
-	{
-		ft_memcpy(line, buffer, found_newline_at);
-		ft_memset(buffer, 0, found_newline_at);
-	}
-}
+typedef struct	s_line {
+	char			*content;
+	unsigned int	size;
+	unsigned int	previous_size;
+}	t_line;
 
 char	*get_next_line(int fd)
 {
-	static void	*buffer[BUFFER_SIZE];
-	char		*line;
-	ssize_t		nread;
+	static t_buffer	buffer = {.content = NULL, .size = 0};
+	static t_line	line = {.content = NULL, .size = 0, .previous_size = 0};
 
-	line = NULL;
-	is_line_ready = handle_buffer();
-	while(!is_line_ready)
+	free(line.content);
+	line.content = NULL;
+
+	start:
+
+	// look for a newline in buffer
+	int found_newline;
+	int	found_newline_at;
+
+	found_newline = 0;
+	while (i < buffer.end)
 	{
-		nread = read(fd, buffer, BUFFER_SIZE);
-		if (nread == -1)
+		if (buffer.content[i] == '\n')
 		{
-			free(line)
-			return (NULL)
+			found_newline = 1;
+			found_newline_at = i;
+			break;
 		}
-		else if (nread == 0)
-			is_line_ready = 1;
-		else if (nread > 0)
-			is_line_ready = handle_buffer(&buffer, &line, nread);
+		i++;
 	}
-	return (line);
+
+	// calculate total size for the line realloc
+	int new_line_size;
+
+	new_line_size = 0;
+	new_line_size += line.size;
+	if (found_newline)
+		new_line_size += found_newline_at + 1;
+	else
+		new_line_size += buffer.size;
+	line.previous_size = line.size;
+	line.size = new_line_size;
+
+	// realloc line
+	char	*new_line_content;
+	new_line_content = malloc(new_line_size);
+	if (new_line_content = NULL)
+		return (NULL);
+	free(line.content);
+	line.content = new_line_content;
+
+	// copy from buffer to line
+	int	i;
+
+	i = 0;
+	if (found_newline)
+	{
+		while (i <= found_newline_at)
+		{
+			line.content[line.previous_size + i] = buffer.content[i];
+			i++;
+		}
+	}
+	else
+	{
+		while (i < buffer.size)
+		{
+			line.content[line.previous_size + i] = buffer.content[i];
+			i++;
+		}
+	}
+
+
+	// shift buffer (copy from buffer to buffer)
+	int	i;
+
+	i = 0;
+	if (found_newline)
+	{
+		while (i <= found_newline_at)
+		{
+			buffer.content[i] = buffer.content[found_newline_at + i];
+			i++;
+		}
+		buffer.size = bufer.size - found_newline_at + 1;
+	}
+	else
+	{
+		buffer.size = 0;
+	}
+
+	// read from fd
+	int	nread;
+
+	nread = read(fd, &buffer.content, BUFFER_SIZE);
+
+	if (nread == -1)
+	{
+		free(line.content);
+		return (NULL);
+	}
+
+	if (nread == 0)
+	{
+		if (line)
+			return (line.content);
+		return (NULL);
+	}
+
+	if (nread > 0)
+	{
+		buffer.end = nread;
+		goto start;
+	}
 }
