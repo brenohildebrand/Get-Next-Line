@@ -1,124 +1,107 @@
-#include <stdio.h>
-#include <stdlib.h>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/08/28 10:54:50 by bhildebr          #+#    #+#             */
+/*   Updated: 2023/08/28 10:54:50 by bhildebr         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#include "get_next_line.h"
 
 #ifndef BUFFER_SIZE
 # define BUFFER_SIZE 42
 #endif
 
-#ifndef ERROR_PROMPT
-# define ERROR_PROMPT ">> "
-#endif
-
-void	assert(const char expression, const char *message)
+char	*get_next_line(int fd)
 {
-	if (expression == 1)
-		return ;
-	printf("\033[31m[ERROR]\033[0m");
-	// printf(" %s:%d ", __FILE__, __LINE__);
-	// printf("%s", ERROR_PROMPT);
-	printf("%s", message);
-	exit(1);
-}
-
-int	ft_strlen(char *str)
-{
-	int	len;
-	
-	len = 0;
-	while (str[len])
-		len++;
-	return (len);
-}
-
-int	ft_appendstr(char **buffer, char *chunk)
-{
+	char	buffer[BUFFER_SIZE];
+	int		is_line_complete;
 	int		i;
-	int		j;
-	char	*new_buffer;
+	int		did_you_read;
+	static char	*line = NULL;
+	static char *tail = NULL;
+	static int	all_read = NULL;
 
-	new_buffer = malloc(ft_strlen(*buffer) + ft_strlen(chunk) + 1);
+	// verify if there's a line on tail
+	// read BUFFER_SIZE and append to tail
+	// call gnl again
+
+	
+
+	//
+	//
+	//
+	//
+
+	did_you_read = read(fd, buffer, BUFFER_SIZE);
+	if (did_you_read < BUFFER_SIZE)
+	{
+		line = ft_strjoin(tail, ft_substr(buffer, 0, did_you_read - 1)); // substr must return NULL in (buffer, 0, -1)
+		tail = NULL;
+		return (line);
+	}
+
 	i = 0;
-	while ((*buffer)[i])
-	{
-		new_buffer[i] = (*buffer)[i];
+	while (i < BUFFER_SIZE - 1 && buffer[i] != '\n')
 		i++;
-	}
-	j = 0;
-	while (chunk[j])
+
+	is_line_complete = (buffer[i] == '\n');
+	
+
+	if (is_line_complete)
 	{
-		new_buffer[i + j] = chunk[j];
-		j++;
+		line = ft_strjoin(tail, ft_substr(buffer, 0, i));
+		tail = ft_strjoin(tail, ft_substr(buffer, i + 1, BUFFER_SIZE - 1));
+		return (line);
 	}
-	new_buffer[i + j] = '\0';
-	free(*buffer);
-	*buffer = new_buffer;
+	else
+	{
+		tail = ft_strjoin(tail, buffer);
+		return (get_next_line(fd));
+	}
+
+	// read BUFFER_SIZE to buffer
+	// get line
+	// keep the tail
+	// return line
+	// read next
+	// OBS: free memory
+	nread = read(fd, buffer, BUFFER_SIZE);
 }
 
-int	populate_buffer(int fd, char **buffer)
-{
-	char	chunk[BUFFER_SIZE];
-	int		nread;
-
-	nread = read(fd, chunk, BUFFER_SIZE);
-	if (nread == -1)
-		return (-1);
-	chunk[nread] = '\0';
-	while (nread > 0 && /* chunk does not contain a newline character */)
-	{
-		if(ft_appendstr(buffer, chunk) == -1)
-			return (-1);
-		nread = read(fd, chunk, BUFFER_SIZE);
-		if (nread == -1)
-			return (-1);
-		chunk[nread] = '\0';
-	}
-	return (0);
-}
-
-void	*get_next_line(int fd)
-{
-	static char	*buffer = NULL;
-	char		*line;
-
-	if (buffer == NULL)
-	{
-		buffer = malloc(1 * sizeof(char));
-		if (buffer == NULL)
-			return (NULL);
-		buffer[0] = '\0';
-	}
-	line = NULL;
-	if(populate_buffer(fd, &buffer) == -1)
-	{
-		free(line);
-		free(buffer);
-		return (NULL);
-	}
-	line = get_line_from_buffer(buffer);
-	clean_buffer(&buffer);
-	return (line);
-}
-
-int	main(int argc, char *argv[])
+int	main(char argc, char *argv[])
 {
 	int		fd;
 	char	*line;
 
 	if (argc != 2)
+	{
+		printf("Two arguments are expected.\n");
 		return (0);
+	}
 	fd = open(argv[1], O_RDONLY);
 	if (fd == -1)
+	{
+		printf("An error ocurred while opening the file.\n");
 		return (0);
+	}
 	while (1)
 	{
 		line = get_next_line(fd);
-		if (line == NULL)
+		if (line == (void *)0)
 			break ;
-		else
-			printf("%s", line);
+		printf("%s", get_next_line(fd));
 	}
 	printf("\n");
 }
