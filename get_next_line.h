@@ -17,5 +17,7 @@ void	ft_assign_s(char **ps1, char *s2);
 int     ft_strlen(char *s);
 char	*ft_strjoin(char *s1, char *s2);
 char	*ft_substr(char *s, int start, int end);
+char	*ft_newstr(void);
+int		ft_strchr_i(char *s, char c);
 
 #endif

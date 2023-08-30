@@ -23,66 +23,83 @@
 # define BUFFER_SIZE 42
 #endif
 
+# define TRUE 1
+# define FALSE 0
+
 char	*get_next_line(int fd)
 {
-	char	buffer[BUFFER_SIZE];
-	int		is_line_complete;
-	int		i;
-	int		did_you_read;
+	static char *all = NULL;
 	static char	*line = NULL;
-	static char *tail = NULL;
-	static int	all_read = NULL;
+	static int	reached_end_of_file = FALSE;
+	int			nread;
+	int			pos;
+	char		buffer[BUFFER_SIZE];
 
-	// verify if there's a line on tail
-	// read BUFFER_SIZE and append to tail
-	// call gnl again
-
-	
-
-	//
-	//
-	//
-	//
-
-	did_you_read = read(fd, buffer, BUFFER_SIZE);
-	if (did_you_read < BUFFER_SIZE)
+	if (all == NULL)
 	{
-		line = ft_strjoin(tail, ft_substr(buffer, 0, did_you_read - 1)); // substr must return NULL in (buffer, 0, -1)
-		tail = NULL;
-		return (line);
+		ft_assign_s(&all, ft_newstr());
+		if (all == NULL)
+			return (NULL);
 	}
 
-	i = 0;
-	while (i < BUFFER_SIZE - 1 && buffer[i] != '\n')
-		i++;
-
-	is_line_complete = (buffer[i] == '\n');
-	
-
-	if (is_line_complete)
+	if (line != NULL)
 	{
-		line = ft_strjoin(tail, ft_substr(buffer, 0, i));
-		tail = ft_strjoin(tail, ft_substr(buffer, i + 1, BUFFER_SIZE - 1));
-		return (line);
-	}
-	else
-	{
-		tail = ft_strjoin(tail, buffer);
-		return (get_next_line(fd));
+		free(line);
+		line = NULL;
 	}
 
-	// read BUFFER_SIZE to buffer
-	// get line
-	// keep the tail
-	// return line
-	// read next
-	// OBS: free memory
+	if (ft_strlen(all) > 0)
+	{
+		pos = ft_strchr_i(all, '\n');
+		if (reached_end_of_file == TRUE && pos == -1)
+			pos = ft_strlen(all) - 1;
+		if (pos != -1)
+		{
+			ft_assign_s(&line, ft_substr(all, 0, pos));
+			ft_assign_s(&all, ft_substr(all, pos + 1, ft_strlen(all) - 1));
+			return (line);
+		}
+	}
+
 	nread = read(fd, buffer, BUFFER_SIZE);
-}
+
+	if (nread == -1)
+	{
+		free(all);
+		all = NULL;
+		free(line);
+		line = NULL;
+		return (NULL);
+	}
+	else if (nread == 0)
+	{
+		if (reached_end_of_file == TRUE)
+		{
+			free(all);
+			all = NULL;
+			free(line);
+			line = NULL;
+			return (NULL);
+		}
+		reached_end_of_file = TRUE;
+	}
+	else if (nread > 0)
+	{
+		char *aux;
+
+		ft_assign_s(&aux, ft_substr(buffer, 0, nread - 1));
+		ft_assign_s(&all, ft_strjoin(all, aux));
+		free(aux);
+		if (all == NULL)
+			return (NULL);
+	}
+	return (get_next_line(fd));
+} 
 
 int	main(char argc, char *argv[])
 {
 	int		fd;
+	int		count;
 	char	*line;
 
 	if (argc != 2)
@@ -96,12 +113,13 @@ int	main(char argc, char *argv[])
 		printf("An error ocurred while opening the file.\n");
 		return (0);
 	}
+	count = 0;
 	while (1)
 	{
 		line = get_next_line(fd);
-		if (line == (void *)0)
+		if (line == NULL)
 			break ;
-		printf("%s", get_next_line(fd));
+		printf("line\t-\t%i\t-\t%s\n", count++, line);
 	}
 	printf("\n");
 }
