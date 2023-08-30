@@ -23,9 +23,9 @@ char	*ft_newstr(void)
 	return (s);
 }
 
-int	ft_strlen(char *s)
+long long int	ft_strlen(char *s)
 {
-	int	i;
+	long long int	i;
 
 	i = 0;
 	while (s[i])
@@ -35,9 +35,9 @@ int	ft_strlen(char *s)
 
 char	*ft_strjoin(char *s1, char *s2)
 {
-	int		i;
-	int		j;
-	char	*s3;
+	long long int	i;
+	long long int	j;
+	char			*s3;
 
 	if (s1 == NULL && s2 == NULL)
 		return (ft_newstr());
@@ -58,10 +58,10 @@ char	*ft_strjoin(char *s1, char *s2)
 	return (s3);
 }
 
-char	*ft_substr(char *s, int start, int end)
+char	*ft_substr(char *s, long long int start, long long int end)
 {
-	int		i;
-	char	*new_s;
+	long long int	i;
+	char			*new_s;
 
 	if (end < start)
 		return (ft_newstr());
@@ -78,9 +78,9 @@ char	*ft_substr(char *s, int start, int end)
 	return (new_s);
 }
 
-int	ft_strchr_i(char *s, char c)
+long long int	ft_strchr_i(char *s, char c)
 {
-	int	i;
+	long long int	i;
 
 	i = 0;
 	while (s[i] && s[i] != c)

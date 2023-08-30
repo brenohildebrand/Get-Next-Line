@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int	main(char argc, char *argv[])
+int	main(int argc, char *argv[])
 {
 	int		fd;
 	int		count;

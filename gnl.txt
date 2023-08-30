@@ -1,4 +1,0 @@
-first line
-second line
-third line
-a long very long long long line

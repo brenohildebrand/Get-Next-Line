@@ -12,13 +12,6 @@
 
 #include "get_next_line.h"
 
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-
 typedef struct s_gnl {
 	char	*all;
 	char	*line;
@@ -39,7 +32,7 @@ void	ft_assign_s(char **ps1, char *s2)
 
 int	get_line(t_gnl *pdata)
 {
-	int	pos;
+	long long int	pos;
 
 	if (ft_strlen(pdata->all) > 0)
 	{
@@ -61,15 +54,18 @@ int	get_line(t_gnl *pdata)
 
 int	read_file(int fd, t_gnl *pdata)
 {
-	int		n;
-	char	b[BUFFER_SIZE];
-	char	*aux;
+	static char		*b = NULL;
+	long long int	n;
+	char			*aux;
 
+	if (b == NULL)
+		b = malloc(BUFFER_SIZE);
 	n = read(fd, b, BUFFER_SIZE);
-	if (n == -1 || (n == 0 && pdata->reached_end_of_file))
+	if (n == -1 || (n == 0 && pdata->reached_end_of_file) || b == NULL)
 	{
 		ft_free(&(pdata->all));
 		ft_free(&(pdata->line));
+		ft_free(&b);
 		return (-1);
 	}
 	else if (n == 0)
@@ -79,7 +75,7 @@ int	read_file(int fd, t_gnl *pdata)
 		aux = NULL;
 		ft_assign_s(&aux, ft_substr(b, 0, n - 1));
 		ft_assign_s(&(pdata->all), ft_strjoin(pdata->all, aux));
-		free(aux);
+		ft_free(&aux);
 		if (pdata->all == NULL)
 			return (-1);
 	}
@@ -101,10 +97,7 @@ char	*get_next_line(int fd)
 			return (NULL);
 	}
 	if (data.line != NULL)
-	{
-		free(data.line);
-		data.line = NULL;
-	}
+		ft_free(&(data.line));
 	if (get_line(&data) == 1)
 		return (data.line);
 	if (read_file(fd, &data) == -1)
