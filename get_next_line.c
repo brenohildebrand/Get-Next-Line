@@ -90,17 +90,19 @@ char	*get_next_line(int fd)
 		.reached_end_of_file = FALSE,
 	};
 
-	if (data.all == NULL)
+	while (1)
 	{
-		ft_assign_s(&(data.all), ft_newstr());
 		if (data.all == NULL)
+		{
+			ft_assign_s(&(data.all), ft_newstr());
+			if (data.all == NULL)
+				return (NULL);
+		}
+		if (data.line != NULL)
+			ft_free(&(data.line));
+		if (get_line(&data) == 1)
+			return (data.line);
+		if (read_file(fd, &data) == -1)
 			return (NULL);
 	}
-	if (data.line != NULL)
-		ft_free(&(data.line));
-	if (get_line(&data) == 1)
-		return (data.line);
-	if (read_file(fd, &data) == -1)
-		return (NULL);
-	return (get_next_line(fd));
 }
