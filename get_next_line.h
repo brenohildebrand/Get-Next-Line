@@ -13,14 +13,16 @@
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
 
-#ifndef BUFFER_SIZE
-# define BUFFER_SIZE 42
-#endif
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 42
+# endif
 
 # define TRUE 1
 # define FALSE 0
 
-int     ft_strlen(char *s);
+char	*get_next_line(int fd);
+
+int		ft_strlen(char *s);
 char	*ft_strjoin(char *s1, char *s2);
 char	*ft_substr(char *s, int start, int end);
 char	*ft_newstr(void);
