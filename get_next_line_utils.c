@@ -11,13 +11,6 @@
 /* ************************************************************************** */
 
 #include <stdlib.h>
-#include <stdio.h>
-
-void	ft_assign_s(char **ps1, char *s2)
-{
-	free(*ps1);
-	*ps1 = s2;
-}
 
 char	*ft_newstr(void)
 {
@@ -47,24 +40,20 @@ char	*ft_strjoin(char *s1, char *s2)
 	char	*s3;
 
 	if (s1 == NULL && s2 == NULL)
-		return ("\0");
+		return (ft_newstr());
 	if (s1 == NULL)
 		return (s2);
 	else if (s2 == NULL)
 		return (s1);
-	i = 0;
 	s3 = malloc((ft_strlen(s1) + ft_strlen(s2) + 1) * sizeof(char));
-	while (s1[i])
-	{
+	if (s3 == NULL)
+		return (NULL);
+	i = -1;
+	while (s1[++i])
 		s3[i] = s1[i];
-		i++;
-	}
-	j = 0;
-	while (s2[j])
-	{
+	j = -1;
+	while (s2[++j])
 		s3[i + j] = s2[j];
-		j++;
-	}
 	s3[i + j] = '\0';
 	return (s3);
 }
@@ -74,9 +63,8 @@ char	*ft_substr(char *s, int start, int end)
 	int		i;
 	char	*new_s;
 
-	printf("substring: %s\t%i-%i\n", s, start, end);
 	if (end < start)
-		return ft_newstr();
+		return (ft_newstr());
 	new_s = malloc(((end - start + 1) + 1) * sizeof(char));
 	if (new_s == NULL)
 		return (NULL);

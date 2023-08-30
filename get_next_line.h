@@ -13,7 +13,13 @@
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
 
-void	ft_assign_s(char **ps1, char *s2);
+#ifndef BUFFER_SIZE
+# define BUFFER_SIZE 42
+#endif
+
+# define TRUE 1
+# define FALSE 0
+
 int     ft_strlen(char *s);
 char	*ft_strjoin(char *s1, char *s2);
 char	*ft_substr(char *s, int start, int end);
