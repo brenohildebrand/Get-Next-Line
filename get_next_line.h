@@ -33,18 +33,22 @@
 # include <unistd.h>
 
 /**
- * Declare the prototypes.
-*/
-char	*get_next_line(int fd);
-void	ft_free(void *p);
-
-/**
  * Define a t_list type that will be used to store data from the fd. It's a
  * linked list.
 */
 typedef struct s_list {
-	char	*content;
-	s_list	*next;
+	char			*content;
+	struct s_list	*next;
 }	t_list;
+
+/**
+ * Declare the prototypes.
+*/
+char	*get_next_line(int fd);
+char	*read_from_fd_to_current_node(int fd, t_list *current_node, int *pflag);
+int		ft_strchr(char *s, char c);
+
+int		traverse_to_find_line(t_list *list, int was_file_completely_read);
+int		traverse_to_get_line(t_list *list, int was_file_completely_read);
 
 #endif

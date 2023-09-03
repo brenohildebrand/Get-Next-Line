@@ -12,17 +12,46 @@
 
 #include "get_next_line.h"
 
+// defining the details:
+// the line will have a '\0' at the end
+// the buffer size and the list nodes will not -> use BUFFER_SIZE
+
 /**
- * @brief Try to find a line in the list and returns it. If the line does not
- * exist returns NULL. Note that this function will change the list state by
- * removing the line from it.
+ * @brief If a line exists on the list, returns it. Otherwise, returns NULL. 
+ * @note This function will change the list state by removing the line 
+ * from it.
 */
-char	*get_line_from_list(t_list *list)
+char	*get_line_from_list(t_list *list, int flag)
 {
-	char	*line;
+	if (traverse_to_find_line(list, flag))
+		return (traverse_to_get_line(list, flag));
+	else
+		return (NULL);
+}
 
+/**
+ * @brief Keeps reading BUFFER_SIZE bytes to list till a newline is found in
+ * these BUFFER_SIZE bytes or till the end of the file. If the end of the file
+ * is reached, set flag to 1.
+*/
+char	*read_from_fd_to_list(int fd, t_list *list, int *pflag)
+{
+	static t_list	*previous_node = NULL;
+	t_list			*current_node;
 
-	return (line);
+	while (1)
+	{
+		current_node = malloc(BUFFER_SIZE * sizeof(t_list));
+		if (current_node == NULL)
+			return (NULL);
+		current_node = read_from_fd_to_current_node(fd, current_node, pflag);
+		if (current_node == NULL)
+			return (NULL);
+		previous_node->next = current_node;
+		previous_node = current_node;		
+		if (strchr(current_node->content, '\n') == TRUE)
+			return (current_node->content);
+	}
 }
 
 /**
@@ -32,14 +61,18 @@ char	*get_line_from_list(t_list *list)
 */
 char	*get_next_line(int fd)
 {
-	static char	*line = NULL;
-	t_list		*list = NULL;
+	static char		*line = NULL;
+	static t_list	*list = NULL;
 
-	// free the line if it exists and set it to NULL
-	// read buffer_size
-	// analyze to see if it should stop reading and save the index where the line ends
-	// create a copy of the line while freeing the list
-	// returns the line
-
-	
+	while (1)
+	{
+		if (line != NULL)
+			free(line);
+		line = get_line_from_list(list);
+		if (line != NULL)
+			return (line);
+		read_from_fd_to_list(list);
+		if (list == NULL)
+			return (NULL);
+	}
 }
