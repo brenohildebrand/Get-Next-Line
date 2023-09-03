@@ -19,6 +19,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+/**
+ * @brief Calls get_next_line until it returns NULL.
+*/
 int	main(int argc, char *argv[])
 {
 	int		fd;
@@ -44,5 +47,4 @@ int	main(int argc, char *argv[])
 			break ;
 		printf("line\t-\t%.2i\t-\t%s", count++, line);
 	}
-	printf("\n");
 }

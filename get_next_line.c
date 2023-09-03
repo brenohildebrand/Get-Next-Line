@@ -12,97 +12,34 @@
 
 #include "get_next_line.h"
 
-typedef struct s_gnl {
-	char	*all;
+/**
+ * @brief Try to find a line in the list and returns it. If the line does not
+ * exist returns NULL. Note that this function will change the list state by
+ * removing the line from it.
+*/
+char	*get_line_from_list(t_list *list)
+{
 	char	*line;
-	int		reached_end_of_file;
-}	t_gnl;
 
-void	ft_free(char **p)
-{
-	free(*p);
-	*p = NULL;
+
+	return (line);
 }
 
-void	ft_assign_s(char **ps1, char *s2)
-{
-	free(*ps1);
-	*ps1 = s2;
-}
-
-int	get_line(t_gnl *pdata)
-{
-	long long int	pos;
-
-	if (ft_strlen(pdata->all) > 0)
-	{
-		pos = ft_strchr_i(pdata->all, '\n');
-		if (pdata->reached_end_of_file && pos == -1)
-			pos = ft_strlen(pdata->all) - 1;
-		if (pos != -1)
-		{
-			ft_assign_s(&(pdata->line), ft_substr(pdata->all, 0, pos));
-			ft_assign_s(\
-				&(pdata->all), \
-				ft_substr(pdata->all, pos + 1, ft_strlen(pdata->all) - 1) \
-			);
-			return (1);
-		}
-	}
-	return (0);
-}
-
-int	read_file(int fd, t_gnl *pdata)
-{
-	static char		*b = NULL;
-	long long int	n;
-	char			*aux;
-
-	if (b == NULL)
-		b = malloc(BUFFER_SIZE);
-	n = read(fd, b, BUFFER_SIZE);
-	if (n == -1 || (n == 0 && pdata->reached_end_of_file) || b == NULL)
-	{
-		ft_free(&(pdata->all));
-		ft_free(&(pdata->line));
-		ft_free(&b);
-		return (-1);
-	}
-	else if (n == 0)
-		pdata->reached_end_of_file = TRUE;
-	else if (n > 0)
-	{
-		aux = NULL;
-		ft_assign_s(&aux, ft_substr(b, 0, n - 1));
-		ft_assign_s(&(pdata->all), ft_strjoin(pdata->all, aux));
-		ft_free(&aux);
-		if (pdata->all == NULL)
-			return (-1);
-	}
-	return (0);
-}
-
+/**
+ * @brief Returns the next line given a file descriptor.
+ * @param fd file descriptor (a non-negative number indicating a file).
+ * @internal Describe the function internals here.
+*/
 char	*get_next_line(int fd)
 {
-	static t_gnl	data = {
-		.all = NULL,
-		.line = NULL,
-		.reached_end_of_file = FALSE,
-	};
+	static char	*line = NULL;
+	t_list		*list = NULL;
 
-	while (1)
-	{
-		if (data.all == NULL)
-		{
-			ft_assign_s(&(data.all), ft_newstr());
-			if (data.all == NULL)
-				return (NULL);
-		}
-		if (data.line != NULL)
-			ft_free(&(data.line));
-		if (get_line(&data) == 1)
-			return (data.line);
-		if (read_file(fd, &data) == -1)
-			return (NULL);
-	}
+	// free the line if it exists and set it to NULL
+	// read buffer_size
+	// analyze to see if it should stop reading and save the index where the line ends
+	// create a copy of the line while freeing the list
+	// returns the line
+
+	
 }

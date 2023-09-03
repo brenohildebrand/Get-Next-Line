@@ -13,22 +13,38 @@
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
 
+/**
+ * Defines BUFFER_SIZE if not defined yet.
+*/
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 42
 # endif
 
+/**
+ * Define boolean values.
+*/
 # define TRUE 1
 # define FALSE 0
 
+/**
+ * Include the headers matching the available functions for the project.
+*/
 # include <stdlib.h>
 # include <unistd.h>
 
+/**
+ * Declare the prototypes.
+*/
 char	*get_next_line(int fd);
+void	ft_free(void *p);
 
-int		ft_strlen(char *s);
-char	*ft_strjoin(char *s1, char *s2);
-char	*ft_substr(char *s, int start, int end);
-char	*ft_newstr(void);
-int		ft_strchr_i(char *s, char c);
+/**
+ * Define a t_list type that will be used to store data from the fd. It's a
+ * linked list.
+*/
+typedef struct s_list {
+	char	*content;
+	s_list	*next;
+}	t_list;
 
 #endif
