@@ -13,66 +13,6 @@
 #include "get_next_line.h"
 
 /**
- * @brief Returns 1 if there's a newline character on the list or 0 otherwise.
-*/
-int	traverse_to_find_line(t_list *list, int was_file_completely_read)
-{
-	long long unsigned int i;
-
-	i = 0;
-	while (list && list->content[i] != '\n')
-	{
-		i++;
-		if (i == BUFFER_SIZE)
-		{
-			i = 0;
-			list = list->next;
-		}
-	}
-	if (list && list->content[i] == '\n')
-		return (1);
-	else if (list == NULL && was_file_completely_read)
-		return (1);
-	else
-		return (0);
-}
-
-/**
- * @brief
-*/
-char	*traverse_to_get_line(t_list *list, int was_file_completely_read)
-{
-	long long unsigned int	i;
-	char					*line;
-	char					*line_start;
-
-	i = 0;
-	line_start = malloc(BUFFER_SIZE * sizeof(char));
-	line = line_start;
-	if (line == NULL)
-		return (NULL);
-	while (list && list->content[i])
-	{
-		*line = list->content[i] != '\n';
-		line++;
-		i++;
-		if (i == BUFFER_SIZE)
-		{
-			i = 0;
-			list = list->next;
-			// realloc line
-		}
-	}
-	if (list && list->content[i] == '\n')
-	{
-		*line = list->content[i];
-		line++;
-	}
-	*line = '\0';
-	return (line_start);
-}
-
-/**
  * @brief Look for the char c in the buffer s returning 1 if it's found or
  * 0 if it's not.
  * @note The size of the buffer should be exactly BUFFER_SIZE.
@@ -85,10 +25,74 @@ int	ft_strchr(char *s, char c)
 	while (i < BUFFER_SIZE)
 	{
 		if (s[i] == c)
-			return (1);
+			return (TRUE);
 		i++;
 	}
-	return (0);
+	return (FALSE);
+}
+
+/**
+ * 
+*/
+char	*get_line(t_list *list, int flag, int length)
+{
+	int		idx;
+	int		list_idx;
+	char	*line;
+
+	line = malloc((length + 1) * sizeof(char));
+	if (line == NULL)
+		return (NULL);
+	idx = 0;
+	list_idx = 0;
+	while (list != NULL)
+	{
+		while (idx < BUFFER_SIZE)
+		{
+			line[(BUFFER_SIZE * list_idx) + idx] = list->content[i];
+			idx++;
+		}
+		idx = 0;
+		list_idx += 1;
+		free(list->content);
+		free(list);
+		list = list->next;
+	}
+	line[(BUFFER_SIZE * list_idx) + idx] = '\0';
+	return (line);
+}
+
+/**
+ * 
+*/
+int get_line_length(t_list *list, int flag)
+{
+	int	length;
+
+	length = 0;
+	while (list != NULL)
+	{
+		length += BUFFER_SIZE
+		if (ft_strchr(list->content, '\n') == TRUE)
+			break ;
+		list = list->next;
+	}
+	length += 1;
+	return (length);
+}
+
+/**
+ * 
+*/
+int	ft_lstchr(t_list *list, char c)
+{
+	while (list != NULL)
+	{
+		if (ft_strchr(list->content, c) == TRUE)
+			return (TRUE);
+		list = list->next;
+	}
+	return (FALSE);
 }
 
 /**
@@ -117,18 +121,3 @@ char	*read_from_fd_to_current_node(int fd, t_list *current_node, int *pflag)
 		return (current_node);
 	}
 }
-
-// #include <stdio.h>
-
-// int main(void)
-// {
-// 	t_list	*l;
-
-// 	l = malloc(sizeof(t_list));
-// 	l->content = "hello world hello again and again";
-// 	l->next = NULL;
-
-// 	printf("%d\n", traverse_to_find_line(l, 1));
-
-// 	return (0);
-// }

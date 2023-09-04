@@ -20,13 +20,26 @@
  * @brief If a line exists on the list, returns it. Otherwise, returns NULL. 
  * @note This function will change the list state by removing the line 
  * from it.
+ * @internal To realloc I'll need the size anyways, so calculate the size before
+ * and allocate only once.
 */
 char	*get_line_from_list(t_list *list, int flag)
 {
-	if (traverse_to_find_line(list, flag))
-		return (traverse_to_get_line(list, flag));
-	else
+	static	idx = 0;
+	char	*line;
+	int		length;
+
+	if (list == NULL)
 		return (NULL);
+	if (ft_lstchr(list, '\n') || flag == TRUE)
+	{	
+		length = get_line_length(list, flag);
+		line = get_line(list, flag, length);
+	}
+	else
+	{
+		return (NULL);
+	}
 }
 
 /**
@@ -34,7 +47,7 @@ char	*get_line_from_list(t_list *list, int flag)
  * these BUFFER_SIZE bytes or till the end of the file. If the end of the file
  * is reached, set flag to 1.
 */
-char	*read_from_fd_to_list(int fd, t_list *list, int *pflag)
+int	read_from_file_to_list(int fd, t_list *list, int *pflag)
 {
 	static t_list	*previous_node = NULL;
 	t_list			*current_node;
@@ -43,16 +56,22 @@ char	*read_from_fd_to_list(int fd, t_list *list, int *pflag)
 	{
 		current_node = malloc(BUFFER_SIZE * sizeof(t_list));
 		if (current_node == NULL)
-			return (NULL);
+			return (-1);
+		if (list == NULL)
+			list = current_node;
 		current_node = read_from_fd_to_current_node(fd, current_node, pflag);
 		if (current_node == NULL)
-			return (NULL);
+			return (-1);
 		previous_node->next = current_node;
 		previous_node = current_node;		
-		if (strchr(current_node->content, '\n') == TRUE)
-			return (current_node->content);
+		if (ft_strchr(current_node->content, '\n') == TRUE)
+			return (0);
 	}
 }
+
+typedef struct s_gnl {
+	
+}	t_gnl;
 
 /**
  * @brief Returns the next line given a file descriptor.
@@ -61,8 +80,9 @@ char	*read_from_fd_to_list(int fd, t_list *list, int *pflag)
 */
 char	*get_next_line(int fd)
 {
-	static char		*line = NULL;
-	static t_list	*list = NULL;
+	static	t_gnl	data = {
+
+	};
 
 	while (1)
 	{
@@ -71,8 +91,7 @@ char	*get_next_line(int fd)
 		line = get_line_from_list(list);
 		if (line != NULL)
 			return (line);
-		read_from_fd_to_list(list);
-		if (list == NULL)
-			return (NULL);
+
+		read_from_file_to_list(fd, list);
 	}
 }

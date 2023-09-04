@@ -45,10 +45,10 @@ typedef struct s_list {
  * Declare the prototypes.
 */
 char	*get_next_line(int fd);
-char	*read_from_fd_to_current_node(int fd, t_list *current_node, int *pflag);
 int		ft_strchr(char *s, char c);
-
-int		traverse_to_find_line(t_list *list, int was_file_completely_read);
-int		traverse_to_get_line(t_list *list, int was_file_completely_read);
+char	*get_line(t_list *list, int flag, int length);
+int 	get_line_length(t_list *list, int flag);
+int		ft_lstchr(t_list *list, char c);
+char	*read_from_fd_to_current_node(int fd, t_list *current_node, int *pflag);
 
 #endif
