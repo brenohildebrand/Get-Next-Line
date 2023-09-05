@@ -12,40 +12,55 @@
 
 #include "get_next_line.h"
 
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+// #define BUFFER_SIZE 1
+
 #ifndef BUFFER_SIZE
 # define BUFFER_SIZE 42
 #endif
 
-int		get_line_from_list(t_list *list, char **line_address, int *number_of_lines)
+int		get_line_from_list(t_list **plist, char **line_address, int *number_of_lines)
 {
 	static int	index;
-	int			i;
-	int			j;
 	int			length;
 
+	int		line_index;
+	t_list		*_list;
+
 	// check for a line and it's size
-	if (number_of_lines > 0)
+	if (*number_of_lines > 0)
 	{
 		// get line length
-		i = index;
-		while (list != NULL)
+		int	_index;
+		
+		_index = index;
+		_list = *plist;
+		length = 0;
+		while (_list != NULL)
 		{
-			while (i < BUFFER_SIZE)
+			while (_index < BUFFER_SIZE)
 			{
-				if (list->content[i] == '\n')
+				if (_list->content[_index] == '\n')
 				{
 					length++;
 					break ;
 				}
 				length++;
-				i++;
+				_index++;
 			}
-			if (i < BUFFER_SIZE)
-			{
+			if (_index < BUFFER_SIZE)
 				break ;
+			else
+			{
+				_index = 0;
+				_list = _list->next;
 			}
-			i = 0;
-			list = list->next;
 		}
 
 		// alloc line
@@ -54,51 +69,61 @@ int		get_line_from_list(t_list *list, char **line_address, int *number_of_lines)
 			return (-1);
 		
 		// copy from list to line
-		int		counter;
-
-		counter = 0;
-		while (list != NULL)
+		line_index = 0;
+		while (*plist != NULL)
 		{
 			while (index < BUFFER_SIZE)
 			{
-				(*line_address)[counter] = list->content[index];
-				if (list->content[index] == '\n')
+				(*line_address)[line_index] = (*plist)->content[index];
+				if ((*plist)->content[index] == '\n')
 				{
 					break ;
 				}
 				index++;
-				counter++;
+				line_index++;
 			}
 			if (index < BUFFER_SIZE)
 			{
 				index++;
-				if (index == BUFFER_SIZE)
+				if (index == BUFFER_SIZE || (*plist)->content[index] == '\0') // it will only have the next character being '\0' if it's the last line and you can free the list and mark it as NULL
+				{
+					_list = *plist;
+					*plist = (*plist)->next;
+					free(_list->content);
+					free(_list);
 					index = 0;
-				counter++;
+				}
+				line_index++;
 				break ;
 			}
-			index = 0;
-			list = list->next;
+			else
+			{
+				_list = *plist;
+				*plist = (*plist)->next;
+				free(_list->content);
+				free(_list);
+				index = 0;
+			}
 		}
-		(*line_address)[length] = '\0';
+		(*line_address)[line_index] = '\0';
 
 		// discount line
-		number_of_lines--;
+		(*number_of_lines)--;
 
 		// return ok
 		return (0);
 	}
 	else
 	{
-		*line_address = NULL;
 		return (0);
 	}
 }
 
 // read from file to list till it finds a newline or the file ends
-int		read_from_file_to_list(int fd, t_list *list, int *number_of_lines)
+int		read_from_file_to_list(int fd, t_list **plist, int *number_of_lines)
 {
 	int		nread;
+	t_list	*list;
 	t_list	*new_node;
 	
 	while(1)
@@ -122,16 +147,25 @@ int		read_from_file_to_list(int fd, t_list *list, int *number_of_lines)
 		// check if the file ends
 		if (nread == 0)
 		{
-			(*number_of_lines)++;
+			if (*plist != NULL)
+				(*number_of_lines)++;
 			free(new_node->content);
 			free(new_node);
 			return (0);
 		}
 
 		// add it to list
-		while (list->next != NULL)
-			list = list->next;
-		list->next = new_node;
+		if (*plist == NULL)
+		{
+			*plist = new_node;
+			list = new_node;
+		}
+		else
+		{
+			while (list->next != NULL)
+				list = list->next;
+			list->next = new_node;
+		}
 
 		// count the number of lines and check if a newline was found
 		int	i;
@@ -160,7 +194,7 @@ char	*get_next_line(int fd)
 	static int		number_of_lines = 0;
 
 	// check errors
-	if (fd < 0 || BUFFER_SIZE < 0)
+	if (fd < 0 || BUFFER_SIZE < 0 || read(fd, NULL, 0))
 		return (NULL);
 	// free line
 	if (line != NULL)
@@ -169,19 +203,19 @@ char	*get_next_line(int fd)
 		line = NULL;
 	}
 	// get line if there's any
-	if (get_line_from_list(list, &line, &number_of_lines) == -1)
+	if (get_line_from_list(&list, &line, &number_of_lines) == -1)
 	{
 		// treat error
 	}
 	if (line)
 		return (line);
 	// read to make sure there's a line
-	if (read_from_file_to_list(fd, list, &number_of_lines) == -1)
+	if (read_from_file_to_list(fd, &list, &number_of_lines) == -1)
 	{
 		// treat error
 	}
 	// get line cause there's one... if there's not then it's the end
-	if (get_line_from_list(list, &line, &number_of_lines) == -1)
+	if (get_line_from_list(&list, &line, &number_of_lines) == -1)
 	{
 		// treat error
 	}
@@ -191,3 +225,64 @@ char	*get_next_line(int fd)
 	// reset state
 	return (NULL);
 }
+
+// int	main(int argc, char *argv[])
+// {
+// 	int		fd;
+// 	int		count;
+// 	char	*line;
+
+// 	// Test 00
+// 	fd = open("test06.txt", O_RDWR);
+// 	if (fd == -1)
+// 	{
+// 		printf("An error ocurred while opening the file.\n");
+// 		return (0);
+// 	}
+// 	count = 0;
+// 	while (1)
+// 	{
+// 		line = get_next_line(fd);
+// 		if (line == NULL)
+// 			break ;
+// 		printf("line\t-\t%.2i\t-\t%s", count++, line);
+// 	}
+// 	printf("\n\n");
+// 	close(fd);
+
+// 	// Test 01
+// 	fd = open("test01.txt", O_RDWR);
+// 	if (fd == -1)
+// 	{
+// 		printf("An error ocurred while opening the file.\n");
+// 		return (0);
+// 	}
+// 	count = 0;
+// 	while (1)
+// 	{
+// 		line = get_next_line(fd);
+// 		if (line == NULL)
+// 			break ;
+// 		printf("line\t-\t%.2i\t-\t%s", count++, line);
+// 	}
+// 	printf("\n\n");
+// 	close(fd);
+
+// 	// Test 02
+// 	fd = open("test02.txt", O_RDWR);
+// 	if (fd == -1)
+// 	{
+// 		printf("An error ocurred while opening the file.\n");
+// 		return (0);
+// 	}
+// 	count = 0;
+// 	while (1)
+// 	{
+// 		line = get_next_line(fd);
+// 		if (line == NULL)
+// 			break ;
+// 		printf("line\t-\t%.2i\t-\t%s", count++, line);
+// 	}
+// 	printf("\n\n");
+// 	close(fd);
+// }
