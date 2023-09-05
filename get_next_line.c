@@ -5,93 +5,167 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/08/28 10:54:50 by bhildebr          #+#    #+#             */
-/*   Updated: 2023/08/28 10:54:50 by bhildebr         ###   ########.fr       */
+/*   Created: 2023/09/04 21:57:24 by bhildebr          #+#    #+#             */
+/*   Updated: 2023/09/04 21:57:24 by bhildebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-// defining the details:
-// the line will have a '\0' at the end
-// the buffer size and the list nodes will not -> use BUFFER_SIZE
-
-/**
- * @brief If a line exists on the list, returns it. Otherwise, returns NULL. 
- * @note This function will change the list state by removing the line 
- * from it.
- * @internal To realloc I'll need the size anyways, so calculate the size before
- * and allocate only once.
-*/
-char	*get_line_from_list(t_list *list, int flag)
+int		get_line_from_list(t_list *list, char **line_address, int *number_of_lines)
 {
-	static	idx = 0;
-	char	*line;
-	int		length;
+	static int	index;
+	int			i;
+	int			j;
+	int			length;
 
-	if (list == NULL)
-		return (NULL);
-	if (ft_lstchr(list, '\n') || flag == TRUE)
-	{	
-		length = get_line_length(list, flag);
-		line = get_line(list, flag, length);
+	// check for a line and it's size
+	if (number_of_lines > 0)
+	{
+		// get line length
+		i = index;
+		while (list != NULL)
+		{
+			while (i < BUFFER_SIZE)
+			{
+				if (list->content[i] == '\n')
+				{
+					length++;
+					break ;
+				}
+				length++;
+				i++;
+			}
+			if (i < BUFFER_SIZE)
+			{
+				break ;
+			}
+			i = 0;
+			list = list->next;
+		}
+
+		// alloc line
+		(*line_address) = malloc((length + 1) * sizeof(char));
+		if ((*line_address) == NULL)
+			return (-1);
+		
+		// copy from list to line
+		int		counter;
+
+		counter = 0;
+		while (list != NULL)
+		{
+			while (index < BUFFER_SIZE)
+			{
+				(*line_address)[counter] = list->content[index];
+				if (list->content[index] == '\n')
+				{
+					break ;
+				}
+				index++;
+				counter++;
+			}
+			if (index < BUFFER_SIZE)
+			{
+				index++;
+				counter++;
+				break ;
+			}
+			index = 0;
+			list = list->next;
+		}
+		(*line_address)[length] = '\0';
+
+		// discount line
+		number_of_lines--;
+
+		// return ok
+		return (0);
 	}
 	else
 	{
-		return (NULL);
+		*line_address = NULL;
+		return (0);
 	}
 }
 
-/**
- * @brief Keeps reading BUFFER_SIZE bytes to list till a newline is found in
- * these BUFFER_SIZE bytes or till the end of the file. If the end of the file
- * is reached, set flag to 1.
-*/
-int	read_from_file_to_list(int fd, t_list *list, int *pflag)
+// read from file to list till it finds a newline or the file ends
+int		read_from_file_to_list(int fd, t_list list, int *number_of_lines)
 {
-	static t_list	*previous_node = NULL;
-	t_list			*current_node;
-
-	while (1)
+	int		nread;
+	t_list	*new_node;
+	
+	while(1)
 	{
-		current_node = malloc(BUFFER_SIZE * sizeof(t_list));
-		if (current_node == NULL)
+		// alloc and init list
+		new_node = malloc(sizeof(t_list));
+		if (new_node == NULL)
 			return (-1);
-		if (list == NULL)
-			list = current_node;
-		current_node = read_from_fd_to_current_node(fd, current_node, pflag);
-		if (current_node == NULL)
+		new_node->content = malloc(BUFFER_SIZE * sizeof(char));
+		if (new_node->content == NULL)
 			return (-1);
-		previous_node->next = current_node;
-		previous_node = current_node;		
-		if (ft_strchr(current_node->content, '\n') == TRUE)
+		for (int i = 0; i < BUFFER_SIZE; i++)
+			new_node->content[i] = '\0';
+		new_node->next = NULL;
+
+		// read to it
+		nread = read(fd, new_node->content, BUFFER_SIZE);
+		if (nread == -1)
+			return (-1);
+		
+		// check if the file ends
+		if (nread == 0)
+		{
+			(*number_of_lines)++;
+			free(new_node->content);
+			free(new_node);
 			return (0);
+		}
+
+		// add it to list
+		while (list->next != NULL)
+			list = list->next;
+		list->next = new_node;
+
+		// check if a newline is found
+		if (strchr(new_node->content, '\n'))
+		{
+			(*number_of_lines)++;
+			return (0);
+		}
 	}
 }
 
-typedef struct s_gnl {
-	
-}	t_gnl;
-
-/**
- * @brief Returns the next line given a file descriptor.
- * @param fd file descriptor (a non-negative number indicating a file).
- * @internal Describe the function internals here.
-*/
 char	*get_next_line(int fd)
 {
-	static	t_gnl	data = {
+	static t_list	*list = NULL;
+	static char		*line = NULL;
+	static int		number_of_lines = 0;
 
-	};
-
-	while (1)
+	if (fd < 0 || BUFFER_SIZE < 0)
+		return (NULL);
+	if (line != NULL)
 	{
-		if (line != NULL)
-			free(line);
-		line = get_line_from_list(list);
-		if (line != NULL)
-			return (line);
-
-		read_from_file_to_list(fd, list);
+		free(line);
+		line = NULL;
 	}
+	if (get_line_from_list(list, &line, &number_of_lines) == -1)
+	{
+		// treat error
+	}
+	if (line)
+		return (line);
+	if (read_from_file_to_list(fd, list, &number_of_lines) == -1)
+	{
+		// treat error
+	}
+	if (get_line_from_list(list, &line, &number_of_lines) == -1)
+	{
+		// treat error
+	}
+	if (line)
+		return (line);
+	// if didn't return at this point ... reset state and return NULL
+	// reset state
+	return (NULL);
 }
