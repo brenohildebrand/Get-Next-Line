@@ -12,6 +12,10 @@
 
 #include "get_next_line.h"
 
+#ifndef BUFFER_SIZE
+# define BUFFER_SIZE 42
+#endif
+
 int		get_line_from_list(t_list *list, char **line_address, int *number_of_lines)
 {
 	static int	index;
@@ -68,6 +72,8 @@ int		get_line_from_list(t_list *list, char **line_address, int *number_of_lines)
 			if (index < BUFFER_SIZE)
 			{
 				index++;
+				if (index == BUFFER_SIZE)
+					index = 0;
 				counter++;
 				break ;
 			}
@@ -90,7 +96,7 @@ int		get_line_from_list(t_list *list, char **line_address, int *number_of_lines)
 }
 
 // read from file to list till it finds a newline or the file ends
-int		read_from_file_to_list(int fd, t_list list, int *number_of_lines)
+int		read_from_file_to_list(int fd, t_list *list, int *number_of_lines)
 {
 	int		nread;
 	t_list	*new_node;
@@ -127,12 +133,23 @@ int		read_from_file_to_list(int fd, t_list list, int *number_of_lines)
 			list = list->next;
 		list->next = new_node;
 
-		// check if a newline is found
-		if (strchr(new_node->content, '\n'))
+		// count the number of lines and check if a newline was found
+		int	i;
+		int	a_newline_was_found;
+
+		i = 0;
+		a_newline_was_found = 0;
+		while (i < BUFFER_SIZE)
 		{
-			(*number_of_lines)++;
-			return (0);
+			if (new_node->content[i] == '\n')
+			{
+				(*number_of_lines)++;
+				a_newline_was_found = 1;
+			}
+			i++;
 		}
+		if (a_newline_was_found)
+			return (0);
 	}
 }
 
@@ -142,23 +159,28 @@ char	*get_next_line(int fd)
 	static char		*line = NULL;
 	static int		number_of_lines = 0;
 
+	// check errors
 	if (fd < 0 || BUFFER_SIZE < 0)
 		return (NULL);
+	// free line
 	if (line != NULL)
 	{
 		free(line);
 		line = NULL;
 	}
+	// get line if there's any
 	if (get_line_from_list(list, &line, &number_of_lines) == -1)
 	{
 		// treat error
 	}
 	if (line)
 		return (line);
+	// read to make sure there's a line
 	if (read_from_file_to_list(fd, list, &number_of_lines) == -1)
 	{
 		// treat error
 	}
+	// get line cause there's one... if there's not then it's the end
 	if (get_line_from_list(list, &line, &number_of_lines) == -1)
 	{
 		// treat error
