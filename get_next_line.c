@@ -19,15 +19,24 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-// #define BUFFER_SIZE 1
+int	read_error = 0;
+
+int	ft_read(int fd, void *buf, size_t count)
+{
+	if (read_error)
+		return (-1);
+	else
+		return (read(fd, buf, count));
+}
+
+#define BUFFER_SIZE 10
 
 #ifndef BUFFER_SIZE
 # define BUFFER_SIZE 42
 #endif
 
-int		get_line_from_list(t_list **plist, char **line_address, int *number_of_lines)
+int		get_line_from_list(t_list **plist, char **line_address, int *number_of_lines, int *pindex)
 {
-	static int	index;
 	int			length;
 
 	int		line_index;
@@ -39,7 +48,7 @@ int		get_line_from_list(t_list **plist, char **line_address, int *number_of_line
 		// get line length
 		int	_index;
 		
-		_index = index;
+		_index = *pindex;
 		_list = *plist;
 		length = 0;
 		while (_list != NULL)
@@ -72,26 +81,26 @@ int		get_line_from_list(t_list **plist, char **line_address, int *number_of_line
 		line_index = 0;
 		while (*plist != NULL)
 		{
-			while (index < BUFFER_SIZE)
+			while (*pindex < BUFFER_SIZE)
 			{
-				(*line_address)[line_index] = (*plist)->content[index];
-				if ((*plist)->content[index] == '\n')
+				(*line_address)[line_index] = (*plist)->content[*pindex];
+				if ((*plist)->content[*pindex] == '\n')
 				{
 					break ;
 				}
-				index++;
+				(*pindex)++;
 				line_index++;
 			}
-			if (index < BUFFER_SIZE)
+			if (*pindex < BUFFER_SIZE)
 			{
-				index++;
-				if (index == BUFFER_SIZE || (*plist)->content[index] == '\0') // it will only have the next character being '\0' if it's the last line and you can free the list and mark it as NULL
+				(*pindex)++;
+				if (*pindex == BUFFER_SIZE || (*plist)->content[*pindex] == '\0') // it will only have the next character being '\0' if it's the last line and you can free the list and mark it as NULL
 				{
 					_list = *plist;
 					*plist = (*plist)->next;
 					free(_list->content);
 					free(_list);
-					index = 0;
+					*pindex = 0;
 				}
 				line_index++;
 				break ;
@@ -102,7 +111,7 @@ int		get_line_from_list(t_list **plist, char **line_address, int *number_of_line
 				*plist = (*plist)->next;
 				free(_list->content);
 				free(_list);
-				index = 0;
+				*pindex = 0;
 			}
 		}
 		(*line_address)[line_index] = '\0';
@@ -126,6 +135,7 @@ int		read_from_file_to_list(int fd, t_list **plist, int *number_of_lines)
 	t_list	*list;
 	t_list	*new_node;
 	
+	list = *plist;
 	while(1)
 	{
 		// alloc and init list
@@ -140,9 +150,13 @@ int		read_from_file_to_list(int fd, t_list **plist, int *number_of_lines)
 		new_node->next = NULL;
 
 		// read to it
-		nread = read(fd, new_node->content, BUFFER_SIZE);
+		nread = ft_read(fd, new_node->content, BUFFER_SIZE);
 		if (nread == -1)
+		{
+			free(new_node->content);
+			free(new_node);
 			return (-1);
+		}
 		
 		// check if the file ends
 		if (nread == 0)
@@ -190,20 +204,21 @@ int		read_from_file_to_list(int fd, t_list **plist, int *number_of_lines)
 char	*get_next_line(int fd)
 {
 	static t_list	*list = NULL;
-	static char		*line = NULL;
+	char		*line = NULL;
 	static int		number_of_lines = 0;
+	static int	index = 0;
 
 	// check errors
 	if (fd < 0 || BUFFER_SIZE < 0 || read(fd, NULL, 0))
 		return (NULL);
 	// free line
-	if (line != NULL)
-	{
-		free(line);
-		line = NULL;
-	}
+	// if (line != NULL)
+	// {
+	// 	free(line);
+	// 	line = NULL;
+	// }
 	// get line if there's any
-	if (get_line_from_list(&list, &line, &number_of_lines) == -1)
+	if (get_line_from_list(&list, &line, &number_of_lines, &index) == -1)
 	{
 		// treat error
 	}
@@ -213,9 +228,22 @@ char	*get_next_line(int fd)
 	if (read_from_file_to_list(fd, &list, &number_of_lines) == -1)
 	{
 		// treat error
+		// free list
+		while (list != NULL)
+		{
+			t_list	*_list;
+
+			_list = list;
+			list = list->next;
+			free(_list->content);
+			free(_list);
+		}
+		number_of_lines = 0;
+		index = 0;
+		return (NULL);
 	}
 	// get line cause there's one... if there's not then it's the end
-	if (get_line_from_list(&list, &line, &number_of_lines) == -1)
+	if (get_line_from_list(&list, &line, &number_of_lines, &index) == -1)
 	{
 		// treat error
 	}
@@ -226,63 +254,49 @@ char	*get_next_line(int fd)
 	return (NULL);
 }
 
-// int	main(int argc, char *argv[])
-// {
-// 	int		fd;
-// 	int		count;
-// 	char	*line;
+int	main(int argc, char *argv[])
+{
+	int		fd;
+	int		count;
+	char	*line;
 
-// 	// Test 00
-// 	fd = open("test06.txt", O_RDWR);
-// 	if (fd == -1)
-// 	{
-// 		printf("An error ocurred while opening the file.\n");
-// 		return (0);
-// 	}
-// 	count = 0;
-// 	while (1)
-// 	{
-// 		line = get_next_line(fd);
-// 		if (line == NULL)
-// 			break ;
-// 		printf("line\t-\t%.2i\t-\t%s", count++, line);
-// 	}
-// 	printf("\n\n");
-// 	close(fd);
-
-// 	// Test 01
-// 	fd = open("test01.txt", O_RDWR);
-// 	if (fd == -1)
-// 	{
-// 		printf("An error ocurred while opening the file.\n");
-// 		return (0);
-// 	}
-// 	count = 0;
-// 	while (1)
-// 	{
-// 		line = get_next_line(fd);
-// 		if (line == NULL)
-// 			break ;
-// 		printf("line\t-\t%.2i\t-\t%s", count++, line);
-// 	}
-// 	printf("\n\n");
-// 	close(fd);
-
-// 	// Test 02
-// 	fd = open("test02.txt", O_RDWR);
-// 	if (fd == -1)
-// 	{
-// 		printf("An error ocurred while opening the file.\n");
-// 		return (0);
-// 	}
-// 	count = 0;
-// 	while (1)
-// 	{
-// 		line = get_next_line(fd);
-// 		if (line == NULL)
-// 			break ;
-// 		printf("line\t-\t%.2i\t-\t%s", count++, line);
-// 	}
-// 	printf("\n\n");
-// 	close(fd);
-// }
+	// Test 00
+	fd = open("test08.txt", O_RDWR);
+	if (fd == -1)
+	{
+		printf("An error ocurred while opening the file.\n");
+		return (0);
+	}
+	count = 0;
+	while (1)
+	{
+		if (count == 2)
+			read_error = 1;
+		line = get_next_line(fd);
+		if (line == NULL)
+			break ;
+		printf("line\t-\t%.2i\t-\t%s", count++, line);
+		free(line);
+	}
+	printf("\n\n");
+	close(fd);
+	//
+	read_error = 0;
+	fd = open("test00.txt", O_RDWR);
+	if (fd == -1)
+	{
+		printf("An error ocurred while opening the file.\n");
+		return (0);
+	}
+	count = 0;
+	while (1)
+	{
+		line = get_next_line(fd);
+		if (line == NULL)
+			break ;
+		printf("line\t-\t%.2i\t-\t%s", count++, line);
+		free(line);
+	}
+	printf("\n\n");
+	close(fd);
+}
