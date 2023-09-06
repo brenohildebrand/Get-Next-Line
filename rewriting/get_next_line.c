@@ -6,7 +6,7 @@
 /*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/06 11:13:15 by bhildebr          #+#    #+#             */
-/*   Updated: 2023/09/06 15:47:55 by bhildebr         ###   ########.fr       */
+/*   Updated: 2023/09/06 17:31:45 by bhildebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ int	read_from_file_to_list(int fd, t_gnl *d)
 	int		a_newline_was_found;
 	int		nread;
 
+	_list = d->list;
 	while (1)
 	{
 		new_node = malloc(sizeof(t_list));
@@ -102,7 +103,6 @@ char	*get_next_line(int fd)
 {
 	static t_gnl	data = {
 		.list = NULL,
-		.line = NULL,
 		.nlines = 0,
 		.index = 0,
 	};
@@ -119,3 +119,48 @@ char	*get_next_line(int fd)
 		return (data.line);
 	return (NULL);
 }
+
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_main.c                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/09/06 11:13:20 by bhildebr          #+#    #+#             */
+/*   Updated: 2023/09/06 16:11:07 by bhildebr         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+// // #include "get_next_line.h"
+
+// #include <fcntl.h>
+// #include <sys/types.h>
+// #include <sys/stat.h>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <unistd.h>
+
+// int	main(int argc, char *argv[])
+// {
+// 	int		fd;
+// 	int		count;
+// 	char	*line;
+
+// 	fd = open("test03.txt", O_RDWR);
+// 	if (fd == -1)
+// 	{
+// 		printf("An error ocurred while opening the file.\n");
+// 		return (0);
+// 	}
+// 	count = 0;
+// 	while (1)
+// 	{
+// 		line = get_next_line(fd);
+// 		if (line == NULL)
+// 			break ;
+// 		printf("line\t-\t%.2i\t-\t%s", count++, line);
+// 		free(line);
+// 	}
+// 	printf("\n");
+// }

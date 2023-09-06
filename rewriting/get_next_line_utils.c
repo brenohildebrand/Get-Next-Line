@@ -6,7 +6,7 @@
 /*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/06 11:13:17 by bhildebr          #+#    #+#             */
-/*   Updated: 2023/09/06 14:16:15 by bhildebr         ###   ########.fr       */
+/*   Updated: 2023/09/06 17:30:33 by bhildebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ void	copy_from_list_to_line(t_gnl *d)
 		{
 			(d->line)[line_index] = d->list->content[d->index];
 			if (d->list->content[d->index] == '\n')
-				break;
+				break ;
 			(d->index)++;
 			line_index++;
 		}
