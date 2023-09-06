@@ -6,7 +6,7 @@
 /*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/06 11:13:12 by bhildebr          #+#    #+#             */
-/*   Updated: 2023/09/06 17:30:11 by bhildebr         ###   ########.fr       */
+/*   Updated: 2023/09/06 18:49:44 by bhildebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,6 @@ typedef struct s_gnl
 }	t_gnl;
 
 char	*get_next_line(int fd);
-
-int		get_line_length(int _index, t_list *_list);
-void	copy_from_list_to_line(t_gnl *d);
+int		read_from_file_to_list(int fd, t_gnl *d);
 
 #endif

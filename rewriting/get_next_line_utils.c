@@ -6,78 +6,139 @@
 /*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/06 11:13:17 by bhildebr          #+#    #+#             */
-/*   Updated: 2023/09/06 17:30:33 by bhildebr         ###   ########.fr       */
+/*   Updated: 2023/09/06 18:51:57 by bhildebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int	get_line_length(int _index, t_list *_list)
+static t_list	*malloc_new_node()
 {
-	int		length;
+	int		_;
+	t_list	*new_node;
 
-	length = 0;
-	while (_list != NULL)
-	{
-		while (_index < BUFFER_SIZE)
-		{
-			if (_list->content[_index] == '\n')
-			{
-				length++;
-				break ;
-			}
-			length++;
-			_index++;
-		}
-		if (_index < BUFFER_SIZE)
-			break ;
-		else
-		{
-			_index = 0;
-			_list = _list->next;
-		}
-	}
-	return (length);
+	new_node = malloc(sizeof(t_list));
+	if (new_node == NULL)
+		return (NULL);
+	new_node->content = malloc(BUFFER_SIZE * sizeof(char));
+	if (new_node->content == NULL)
+		return (NULL);
+	_ = 0;
+	while (_ < BUFFER_SIZE)
+		new_node->content[_++] = '\0';
+	new_node->next = NULL;
+	return (new_node);
 }
 
-void	copy_from_list_to_line(t_gnl *d)
+static void	free_new_node(t_list *new_node)
+{
+	free(new_node->content);
+	free(new_node);
+}
+
+static void	add_new_node_to_list(t_list *new_node, t_gnl *d)
 {
 	t_list	*_list;
-	int		line_index;
 
-	line_index = 0;
-	while (d->list != NULL)
+	if (d->list == NULL)
+		d->list = new_node;
+	else
 	{
-		while (d->index < BUFFER_SIZE)
-		{
-			(d->line)[line_index] = d->list->content[d->index];
-			if (d->list->content[d->index] == '\n')
-				break ;
-			(d->index)++;
-			line_index++;
-		}
-		if (d->index < BUFFER_SIZE)
-		{
-			(d->index)++;
-			if (d->index == BUFFER_SIZE || d->list->content[d->index] == '\0')
-			{
-				_list = d->list;
-				d->list = d->list->next;
-				free(_list->content);
-				free(_list);
-				d->index = 0;
-			}
-			line_index++;
-			break ;
-		}
-		else
-		{
-			_list = d->list;
-			d->list = d->list->next;
-			free(_list->content);
-			free(_list);
-			d->index = 0;
-		}
+		_list = d->list;
+		while (_list->next != NULL)
+			_list = _list->next;
+		_list->next = new_node;
 	}
-	d->line[line_index] = '\0';
+}
+
+static int	count_newlines(t_list *new_node)
+{
+	int	_;
+	int nnewlines;
+	
+	_ = 0;
+	nnewlines = 0;
+	while (_ < BUFFER_SIZE)
+	{
+		if (new_node->content[_] == '\n')
+			nnewlines++;
+		_++;
+	}
+	return (nnewlines);
+}
+
+int	read_from_file_to_list(int fd, t_gnl *d)
+{
+	int		nread;
+	t_list	*new_node;
+	// t_list	*_list;
+	// int		_;
+	// int		a_newline_was_found;
+
+	// _list = d->list;
+	while (1)
+	{
+		// new_node = malloc(sizeof(t_list));
+		// if (new_node == NULL)
+		// 	return (-1);
+		// new_node->content = malloc(BUFFER_SIZE * sizeof(char));
+		// if (new_node->content == NULL)
+		// 	return (-1);
+		// _ = 0;
+		// while (_ < BUFFER_SIZE)
+		// 	new_node->content[_++] = '\0';
+		// new_node->next = NULL;
+		new_node = malloc_new_node();
+		if (new_node == NULL)	
+			return (-1);
+
+		nread = read(fd, new_node->content, BUFFER_SIZE);
+		if (nread == -1)
+		{
+			// free(new_node->content);
+			// free(new_node);
+			free_new_node(new_node);
+			return (-1);
+		}
+
+		if (nread == 0)
+		{
+			if (d->list != NULL)
+				(d->nlines)++;
+			// free(new_node->content);
+			// free(new_node);
+			free_new_node(new_node);
+			return (0);
+		}
+		
+		// if (d->list == NULL)
+		// {
+		// 	d->list = new_node;
+		// 	_list = new_node;	
+		// }
+		// else
+		// {
+		// 	while (_list->next != NULL)
+		// 		_list = _list->next;
+		// 	_list->next = new_node;
+		// }
+
+		// _ = 0;
+		// a_newline_was_found = 0;
+		// while (_ < BUFFER_SIZE)
+		// {
+		// 	if (new_node->content[_] == '\n')
+		// 	{
+		// 		(d->nlines)++;
+		// 		a_newline_was_found = 1;
+		// 	}
+		// 	_++;
+		// }
+		// if (a_newline_was_found)
+		// 	return (0);
+		add_new_node_to_list(new_node, d);
+		d->nlines += count_newlines(new_node);
+		if (count_newlines(new_node))
+			return (0);
+	}
 }
