@@ -6,7 +6,7 @@
 /*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/06 11:13:15 by bhildebr          #+#    #+#             */
-/*   Updated: 2023/09/06 18:23:07 by bhildebr         ###   ########.fr       */
+/*   Updated: 2023/09/06 19:08:11 by bhildebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,19 @@ int	get_line_length(int _index, t_list *_list)
 	return (length);
 }
 
-void	copy_from_list_to_line(t_gnl *d)
+void	advance_to_next_node(t_gnl *d)
 {
 	t_list	*_list;
+
+	_list = d->list;
+	d->list = d->list->next;
+	free(_list->content);
+	free(_list);
+	d->index = 0;
+}
+
+void	copy_from_list_to_line(t_gnl *d)
+{
 	int		line_index;
 
 	line_index = 0;
@@ -60,24 +70,12 @@ void	copy_from_list_to_line(t_gnl *d)
 		{
 			(d->index)++;
 			if (d->index == BUFFER_SIZE || d->list->content[d->index] == '\0')
-			{
-				_list = d->list;
-				d->list = d->list->next;
-				free(_list->content);
-				free(_list);
-				d->index = 0;
-			}
+				advance_to_next_node(d);
 			line_index++;
 			break ;
 		}
 		else
-		{
-			_list = d->list;
-			d->list = d->list->next;
-			free(_list->content);
-			free(_list);
-			d->index = 0;
-		}
+			advance_to_next_node(d);
 	}
 	d->line[line_index] = '\0';
 }
