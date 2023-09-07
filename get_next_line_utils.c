@@ -6,12 +6,11 @@
 /*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/06 11:13:17 by bhildebr          #+#    #+#             */
-/*   Updated: 2023/09/07 14:40:15 by bhildebr         ###   ########.fr       */
+/*   Updated: 2023/09/07 14:54:57 by bhildebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#include <stdio.h>
 
 static t_list	*malloc_new_node(void)
 {
