@@ -29,7 +29,7 @@ int	ft_read(int fd, void *buf, size_t count)
 		return (read(fd, buf, count));
 }
 
-#define BUFFER_SIZE 10
+// #define BUFFER_SIZE 10
 
 #ifndef BUFFER_SIZE
 # define BUFFER_SIZE 42
@@ -204,9 +204,9 @@ int		read_from_file_to_list(int fd, t_list **plist, int *number_of_lines)
 char	*get_next_line(int fd)
 {
 	static t_list	*list = NULL;
-	char		*line = NULL;
 	static int		number_of_lines = 0;
-	static int	index = 0;
+	static int		index = 0;
+	char			*line = NULL;
 
 	// check errors
 	if (fd < 0 || BUFFER_SIZE < 0 || read(fd, NULL, 0))
@@ -254,49 +254,49 @@ char	*get_next_line(int fd)
 	return (NULL);
 }
 
-int	main(int argc, char *argv[])
-{
-	int		fd;
-	int		count;
-	char	*line;
+// int	main(int argc, char *argv[])
+// {
+// 	int		fd;
+// 	int		count;
+// 	char	*line;
 
-	// Test 00
-	fd = open("test08.txt", O_RDWR);
-	if (fd == -1)
-	{
-		printf("An error ocurred while opening the file.\n");
-		return (0);
-	}
-	count = 0;
-	while (1)
-	{
-		if (count == 2)
-			read_error = 1;
-		line = get_next_line(fd);
-		if (line == NULL)
-			break ;
-		printf("line\t-\t%.2i\t-\t%s", count++, line);
-		free(line);
-	}
-	printf("\n\n");
-	close(fd);
-	//
-	read_error = 0;
-	fd = open("test00.txt", O_RDWR);
-	if (fd == -1)
-	{
-		printf("An error ocurred while opening the file.\n");
-		return (0);
-	}
-	count = 0;
-	while (1)
-	{
-		line = get_next_line(fd);
-		if (line == NULL)
-			break ;
-		printf("line\t-\t%.2i\t-\t%s", count++, line);
-		free(line);
-	}
-	printf("\n\n");
-	close(fd);
-}
+// 	// Test 00
+// 	fd = open("test08.txt", O_RDWR);
+// 	if (fd == -1)
+// 	{
+// 		printf("An error ocurred while opening the file.\n");
+// 		return (0);
+// 	}
+// 	count = 0;
+// 	while (1)
+// 	{
+// 		if (count == 2)
+// 			read_error = 1;
+// 		line = get_next_line(fd);
+// 		if (line == NULL)
+// 			break ;
+// 		printf("line\t-\t%.2i\t-\t%s", count++, line);
+// 		free(line);
+// 	}
+// 	printf("\n\n");
+// 	close(fd);
+// 	//
+// 	read_error = 0;
+// 	fd = open("test00.txt", O_RDWR);
+// 	if (fd == -1)
+// 	{
+// 		printf("An error ocurred while opening the file.\n");
+// 		return (0);
+// 	}
+// 	count = 0;
+// 	while (1)
+// 	{
+// 		line = get_next_line(fd);
+// 		if (line == NULL)
+// 			break ;
+// 		printf("line\t-\t%.2i\t-\t%s", count++, line);
+// 		free(line);
+// 	}
+// 	printf("\n\n");
+// 	close(fd);
+// }
