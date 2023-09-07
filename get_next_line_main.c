@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/08/30 15:44:53 by bhildebr          #+#    #+#             */
-/*   Updated: 2023/08/30 15:44:53 by bhildebr         ###   ########.fr       */
+/*   Created: 2023/09/06 11:13:20 by bhildebr          #+#    #+#             */
+/*   Updated: 2023/09/07 12:18:45 by bhildebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-/**
- * @brief Calls get_next_line until it returns NULL.
-*/
 int	main(int argc, char *argv[])
 {
 	int		fd;
@@ -33,7 +30,7 @@ int	main(int argc, char *argv[])
 		printf("Two arguments are expected.\n");
 		return (0);
 	}
-	fd = open(argv[1], O_RDONLY);
+	fd = open(argv[1], O_RDWR);
 	if (fd == -1)
 	{
 		printf("An error ocurred while opening the file.\n");
@@ -46,5 +43,7 @@ int	main(int argc, char *argv[])
 		if (line == NULL)
 			break ;
 		printf("line\t-\t%.2i\t-\t%s", count++, line);
+		free(line);
 	}
+	printf("\n");
 }
