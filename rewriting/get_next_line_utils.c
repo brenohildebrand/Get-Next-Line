@@ -6,7 +6,7 @@
 /*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/06 11:13:17 by bhildebr          #+#    #+#             */
-/*   Updated: 2023/09/06 18:55:07 by bhildebr         ###   ########.fr       */
+/*   Updated: 2023/09/06 19:18:15 by bhildebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ static void	add_new_node_to_list(t_list *new_node, t_gnl *d)
 	}
 }
 
-static int	count_newlines(t_list *new_node)
+static int	count_newlines(t_list *new_node, t_gnl *d)
 {
 	int	_;
 	int	nnewlines;
@@ -64,6 +64,7 @@ static int	count_newlines(t_list *new_node)
 			nnewlines++;
 		_++;
 	}
+	d->nlines += nnewlines;
 	return (nnewlines);
 }
 
@@ -91,8 +92,7 @@ int	read_from_file_to_list(int fd, t_gnl *d)
 			return (0);
 		}
 		add_new_node_to_list(new_node, d);
-		d->nlines += count_newlines(new_node);
-		if (count_newlines(new_node))
+		if (count_newlines(new_node, d))
 			return (0);
 	}
 }

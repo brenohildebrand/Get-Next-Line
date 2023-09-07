@@ -6,7 +6,7 @@
 /*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/06 11:13:20 by bhildebr          #+#    #+#             */
-/*   Updated: 2023/09/06 17:17:16 by bhildebr         ###   ########.fr       */
+/*   Updated: 2023/09/06 19:16:15 by bhildebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ int	main(int argc, char *argv[])
 		printf("Two arguments are expected.\n");
 		return (0);
 	}
-	// Test 00
 	fd = open(argv[1], O_RDWR);
 	if (fd == -1)
 	{

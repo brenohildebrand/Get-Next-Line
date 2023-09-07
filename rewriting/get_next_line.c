@@ -6,7 +6,7 @@
 /*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/06 11:13:15 by bhildebr          #+#    #+#             */
-/*   Updated: 2023/09/06 19:08:11 by bhildebr         ###   ########.fr       */
+/*   Updated: 2023/09/06 19:53:35 by bhildebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,11 +111,14 @@ char	*get_next_line(int fd)
 	data.line = NULL;
 	if (fd < 0 || BUFFER_SIZE < 0 || read(fd, NULL, 0))
 		return (NULL);
-	get_line_from_list(&data);
+	if (get_line_from_list(&data) == -1)
+		return (NULL);
 	if (data.line)
 		return (data.line);
-	read_from_file_to_list(fd, &data);
-	get_line_from_list(&data);
+	if (read_from_file_to_list(fd, &data) == -1)
+		return (NULL);
+	if (get_line_from_list(&data) == -1)
+		return (NULL);
 	if (data.line)
 		return (data.line);
 	return (NULL);
