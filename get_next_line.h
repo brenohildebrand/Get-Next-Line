@@ -6,7 +6,7 @@
 /*   By: bhildebr <bhildebr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/06 11:13:12 by bhildebr          #+#    #+#             */
-/*   Updated: 2023/09/06 18:49:44 by bhildebr         ###   ########.fr       */
+/*   Updated: 2023/09/08 14:17:31 by bhildebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,6 @@
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 42
 # endif
-
-# define TRUE 1
-# define FALSE 1
 
 # include <stdlib.h>
 # include <unistd.h>
